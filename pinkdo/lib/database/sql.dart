@@ -25,7 +25,8 @@ class Sqldb {
     await db.execute('''
     CREATE TABLE "tasks" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
-    "task" TEXT NOT NULL
+    "task" TEXT NOT NULL,
+    "completed" INTEGER,
    )
    ''');
     print("create database");
