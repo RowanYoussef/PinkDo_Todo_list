@@ -63,4 +63,11 @@ class Sqldb {
     int response = await mydb!.rawInsert(value);
     return response;
   }
+
+  //delete database
+  deleteDb() async {
+    String dbpath = await getDatabasesPath();
+    String path = join(dbpath, 'pinkdo.db');
+    await deleteDatabase(path);
+  }
 }

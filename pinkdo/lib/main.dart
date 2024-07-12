@@ -67,8 +67,8 @@ class _PinkDoHomeState extends State<PinkDoHome> {
                 textColor: Colors.white,
                 onPressed: () async {
                   try {
-                    int response = 
-                        await sqldb.deleteData("DELETE FROM 'tasks' WHERE id = 3");
+                    int response = await sqldb
+                        .deleteData("DELETE FROM 'tasks' WHERE id = 3");
                     print(response);
                   } catch (e) {
                     print("Error reading data: $e");
@@ -83,14 +83,28 @@ class _PinkDoHomeState extends State<PinkDoHome> {
                 textColor: Colors.white,
                 onPressed: () async {
                   try {
-                    int response = 
-                        await sqldb.updateData("UPDATE 'tasks' SET 'task' = 'task six' WHERE id = 6");
+                    int response = await sqldb.updateData(
+                        "UPDATE 'tasks' SET 'task' = 'task six' WHERE id = 6");
                     print(response);
                   } catch (e) {
                     print("Error reading data: $e");
                   }
                 },
                 child: Text("update Data"),
+              ),
+            ),
+            Center(
+              child: MaterialButton(
+                color: Colors.red,
+                textColor: Colors.white,
+                onPressed: () async {
+                  try {
+                    await sqldb.deleteDb();
+                  } catch (e) {
+                    print("Error reading data: $e");
+                  }
+                },
+                child: Text("delete db"),
               ),
             ),
           ],
