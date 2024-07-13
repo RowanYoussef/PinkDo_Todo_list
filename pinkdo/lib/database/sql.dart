@@ -27,7 +27,7 @@ class Sqldb {
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
     "task" TEXT NOT NULL,
     "completed" INTEGER,
-    "priority" TEXT
+    "priority" TEXT,
     "Description" Text
    )
    ''');
@@ -72,5 +72,12 @@ class Sqldb {
     String dbpath = await getDatabasesPath();
     String path = join(dbpath, 'pinkdo.db');
     await deleteDatabase(path);
+  }
+
+  // Delete all tasks
+  Future<void> deleteAllTasks() async {
+     Database?mydb = await db;
+     int response = await mydb!.rawDelete("DELETE FROM tasks");
+     await mydb!.execute("UPDATE sqlite_sequence SET seq = 0 WHERE name = 'tasks'");
   }
 }

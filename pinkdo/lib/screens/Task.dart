@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pinkdo/database/sql.dart';
 
 class Task extends StatefulWidget {
   @override
@@ -10,10 +11,42 @@ class _TaskState extends State<Task> {
   String selectedValue = 'Low';
   TextEditingController titleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
+  Sqldb sqldb = Sqldb();
+
+  void saveTask() async {
+    try {
+      String title = titleController.text.trim();
+      String description = descriptionController.text.trim();
+      String priority = selectedValue;
+
+      if (title.isNotEmpty) {
+        int response = await sqldb.insertData(
+          "INSERT INTO tasks (task, completed, priority, description) VALUES ('$title', 0, '$priority', '$description')"
+        );
+        if (response > 0) 
+            Navigator.pop(context, true); 
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Please enter a title for the task.'),
+          backgroundColor: Colors.pink[200],
+        ));
+      }
+    } catch (e) {
+      print("Error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('An error occurred. Please try again later.'),
+        backgroundColor: Colors.pink[200],
+      ));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    TextStyle? textStyle = Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.grey[800]);
+    TextStyle? textStyle = Theme.of(context)
+        .textTheme
+        .titleMedium
+        ?.copyWith(color: Colors.grey[800]);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Task Details', style: TextStyle(color: Colors.white)),
@@ -35,7 +68,7 @@ class _TaskState extends State<Task> {
           ),
         ),
         child: Padding(
-          padding: EdgeInsets.only(top: 15, left: 10, right: 10),
+          padding: EdgeInsets.all(16.0),
           child: ListView(
             children: <Widget>[
               ListTile(
@@ -69,93 +102,84 @@ class _TaskState extends State<Task> {
                   icon: Icon(Icons.arrow_drop_down),
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.only(top: 15, bottom: 15),
-                child: TextField(
-                  controller: titleController,
-                  style: textStyle,
-                  onChanged: (value) {},
-                  decoration: InputDecoration(
-                    labelText: 'Title',
-                    labelStyle: textStyle,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.pink[300]!),
-                      borderRadius: BorderRadius.circular(15),
-                    ),
+              SizedBox(height: 15),
+              TextField(
+                controller: titleController,
+                style: textStyle,
+                decoration: InputDecoration(
+                  labelText: 'Title',
+                  labelStyle: textStyle,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.pink[300]!),
+                    borderRadius: BorderRadius.circular(15),
                   ),
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.only(top: 15, bottom: 15),
-                child: TextField(
-                  controller: descriptionController,
-                  style: textStyle,
-                  onChanged: (value) {},
-                  decoration: InputDecoration(
-                    labelText: 'Description',
-                    labelStyle: textStyle,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.pink[300]!),
-                      borderRadius: BorderRadius.circular(15),
-                    ),
+              SizedBox(height: 15),
+              TextField(
+                controller: descriptionController,
+                style: textStyle,
+                decoration: InputDecoration(
+                  labelText: 'Description',
+                  labelStyle: textStyle,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.pink[300]!),
+                    borderRadius: BorderRadius.circular(15),
                   ),
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.only(top: 15, bottom: 15),
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        child: Text(
-                          'Save',
-                          textScaleFactor: 1.5,
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:  Colors.pink[300],
-                          foregroundColor:  Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: 15),
-                          textStyle: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                        ),
+              SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  ElevatedButton(
+                    onPressed: () {
+                      saveTask();
+                    },
+                    child: Text(
+                      'Save',
+                      textScaleFactor: 1.5,
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:  Colors.pink[300],
+                      foregroundColor:  Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 15),
+                      textStyle: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
                       ),
                     ),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        child: Text(
-                          'Delete',
-                          textScaleFactor: 1.5,
-                        ),
-                        style: ElevatedButton.styleFrom(
-                         backgroundColor:  Colors.pink[300],
-                          foregroundColor:  Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: 15),
-                          textStyle: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                        ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                    },
+                    child: Text(
+                      'Delete',
+                      textScaleFactor: 1.5,
+                    ),
+                    style: ElevatedButton.styleFrom(
+                    backgroundColor:  Colors.pink[300],
+                      foregroundColor:  Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 15),
+                      textStyle: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ],
           ),

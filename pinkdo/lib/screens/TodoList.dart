@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:pinkdo/database/sql.dart';
 
@@ -10,6 +9,7 @@ class TodoList extends StatefulWidget {
 
 class _TodoListState extends State<TodoList> {
   Sqldb sqldb = Sqldb();
+
   Future<List<Map>> readData() async {
     List<Map> data = await sqldb.readData("SELECT * FROM tasks");
     return data;
@@ -21,7 +21,7 @@ class _TodoListState extends State<TodoList> {
   }
 
   void deleteAllTasks() async {
-    await sqldb.deleteDb();
+    await sqldb.deleteAllTasks();
     setState(() {});
   }
 
@@ -134,9 +134,6 @@ class _TodoListState extends State<TodoList> {
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 16,
-                                        decoration: isChecked
-                                            ? TextDecoration.lineThrough
-                                            : TextDecoration.none,
                                         color: isChecked
                                             ? Colors.grey
                                             : Colors.black,
@@ -152,18 +149,19 @@ class _TodoListState extends State<TodoList> {
                                     trailing: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Checkbox(
-                                          value: isChecked,
-                                          onChanged: (bool? value) {
-                                            setState(() {
-                                              snapshot.data![i]['completed'] = value! ? 1 : 0;
-                                              // Update the database
-                                              sqldb.updateData(
-                                                  "UPDATE tasks SET completed = ${value ? 1 : 0} WHERE id = ${snapshot.data![i]['id']}");
-                                            });
-                                          },
-                                          activeColor: Colors.pink[300],
-                                        ),
+                                          Checkbox(
+                                            value: isChecked,
+                                            onChanged: (bool? value) async {
+                                              bool newValue = value ?? false;
+                                              setState(() {
+                                                isChecked = newValue;
+                                              });
+                                              await sqldb.updateData(
+                                                "UPDATE tasks SET completed = ${newValue ? 1 : 0} WHERE id = ${snapshot.data![i]['id']}"
+                                              );
+                                            },
+                                            activeColor: Colors.pink[300],
+                                          ),
                                         IconButton(
                                           icon: Icon(Icons.delete,
                                               color: Colors.pink.shade200),
@@ -196,12 +194,17 @@ class _TodoListState extends State<TodoList> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/Task');
+        onPressed: () async {
+          final result = await Navigator.pushNamed(context, '/Task');
+          if (result != null ) {
+            setState(() {});
+          }
         },
         backgroundColor: Colors.pink[300],
+        foregroundColor: Colors.white,
         child: Icon(Icons.add),
       ),
     );
   }
 }
+
