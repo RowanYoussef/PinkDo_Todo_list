@@ -27,6 +27,8 @@ class Sqldb {
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
     "task" TEXT NOT NULL,
     "completed" INTEGER,
+    "priority" TEXT
+    "Description" Text
    )
    ''');
     print("create database");
@@ -54,14 +56,14 @@ class Sqldb {
   //update function
   updateData(String value) async {
     Database? mydb = await db;
-    int response = await mydb!.rawDelete(value);
+    int response = await mydb!.rawUpdate(value);
     return response;
   }
 
   //delete function
   deleteData(String value) async {
     Database? mydb = await db;
-    int response = await mydb!.rawInsert(value);
+    int response = await mydb!.rawDelete(value);
     return response;
   }
 

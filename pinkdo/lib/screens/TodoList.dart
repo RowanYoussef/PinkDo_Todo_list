@@ -1,5 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 import 'package:pinkdo/database/sql.dart';
 
 class TodoList extends StatefulWidget {
@@ -19,9 +20,19 @@ class _TodoListState extends State<TodoList> {
     setState(() {});
   }
 
+  void deleteAllTasks() async {
+    await sqldb.deleteDb();
+    setState(() {});
+  }
+
+  double calculateCompletionPercentage(List<Map> tasks) {
+    if (tasks.isEmpty) return 0.0;
+    int completedTasks = tasks.where((task) => task['completed'] == 1).length;
+    return completedTasks / tasks.length;
+  }
+
   @override
   Widget build(BuildContext context) {
-    sqldb.insertData("INSERT INTO 'tasks' ('task') VALUES ('task one')");
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -36,6 +47,25 @@ class _TodoListState extends State<TodoList> {
             bottom: Radius.circular(30),
           ),
         ),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (String result) {
+              if (result == 'Delete All') {
+                deleteAllTasks();
+              }
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              PopupMenuItem<String>(
+                value: 'Delete All',
+                child: ListTile(
+                  leading: Icon(Icons.delete, color: Colors.pink[200]),
+                  title: Text('Delete All Tasks',
+                      style: TextStyle(color: Colors.pink[200])),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -55,86 +85,107 @@ class _TodoListState extends State<TodoList> {
                   child: CircularProgressIndicator(),
                 );
               } else if (snapshot.hasData) {
-                if (snapshot.data!.isEmpty) {
-                  return Center(
-                    child: Text(
-                      "No tasks available",
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 18,
+                double completionPercentage =
+                    calculateCompletionPercentage(snapshot.data!);
+                return Column(
+                  children: [
+                    CircularPercentIndicator(
+                      radius: 60.0,
+                      lineWidth: 10.0,
+                      percent: completionPercentage,
+                      center: Text(
+                        "${(completionPercentage * 100).toStringAsFixed(1)}%",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20.0),
                       ),
+                      progressColor: Colors.pink[300],
+                      backgroundColor: Colors.pink[100]!,
                     ),
-                  );
-                } else {
-                  return ListView.builder(
-                    itemCount: snapshot.data!.length,
-                    itemBuilder: (context, i) {
-                      bool isChecked = snapshot.data![i]['completed'] == 1;
-                      return Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        elevation: 5,
-                        margin: EdgeInsets.symmetric(vertical: 8),
-                        child: ListTile(
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 10,
-                          ),
-                          title: Text(
-                            "${snapshot.data![i]['task']}",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              decoration: isChecked
-                                  ? TextDecoration.lineThrough
-                                  : TextDecoration.none,
-                              color: isChecked ? Colors.grey : Colors.black,
+                    SizedBox(height: 20),
+                    snapshot.data!.isEmpty
+                        ? Center(
+                            child: Text(
+                              "No tasks available",
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 18,
+                              ),
+                            ),
+                          )
+                        : Expanded(
+                            child: ListView.builder(
+                              itemCount: snapshot.data!.length,
+                              itemBuilder: (context, i) {
+                                bool isChecked =
+                                    snapshot.data![i]['completed'] == 1;
+                                return Card(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  elevation: 5,
+                                  margin: EdgeInsets.symmetric(vertical: 8),
+                                  child: ListTile(
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 10,
+                                    ),
+                                    title: Text(
+                                      "${snapshot.data![i]['task']}",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        decoration: isChecked
+                                            ? TextDecoration.lineThrough
+                                            : TextDecoration.none,
+                                        color: isChecked
+                                            ? Colors.grey
+                                            : Colors.black,
+                                      ),
+                                    ),
+                                    leading: CircleAvatar(
+                                      backgroundColor: Colors.pink[200],
+                                      child: Icon(
+                                        Icons.task,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Checkbox(
+                                          value: isChecked,
+                                          onChanged: (bool? value) {
+                                            setState(() {
+                                              snapshot.data![i]['completed'] = value! ? 1 : 0;
+                                              // Update the database
+                                              sqldb.updateData(
+                                                  "UPDATE tasks SET completed = ${value ? 1 : 0} WHERE id = ${snapshot.data![i]['id']}");
+                                            });
+                                          },
+                                          activeColor: Colors.pink[300],
+                                        ),
+                                        IconButton(
+                                          icon: Icon(Icons.delete,
+                                              color: Colors.pink.shade200),
+                                          onPressed: () {
+                                            deleteTask(snapshot.data![i]['id']);
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           ),
-                          leading: CircleAvatar(
-                            backgroundColor: Colors.pink[200],
-                            child: Icon(
-                              Icons.task,
-                              color: Colors.white,
-                            ),
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Checkbox(
-                                value: isChecked,
-                                onChanged: (bool? value) {
-                                  setState(() {
-                                    snapshot.data![i]['completed'] =
-                                        value! ? 1 : 0;
-                                    // Update the database
-                                    sqldb.updateData(
-                                        "UPDATE tasks SET completed = ${value ? 1 : 0} WHERE id = ${snapshot.data![i]['id']}");
-                                  });
-                                },
-                                activeColor: Colors.pink[300],
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.delete,
-                                    color: Colors.pink.shade200),
-                                onPressed: () {
-                                  deleteTask(snapshot.data![i]['id']);
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                }
+                  ],
+                );
               } else {
                 return Center(
                   child: Text(
                     "Error loading tasks",
                     style: TextStyle(
-                      color: Colors.red,
+                      color: Colors.pink[200],
                       fontSize: 18,
                     ),
                   ),
@@ -146,7 +197,7 @@ class _TodoListState extends State<TodoList> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Add your onPressed code here!
+          Navigator.pushNamed(context, '/Task');
         },
         backgroundColor: Colors.pink[300],
         child: Icon(Icons.add),
