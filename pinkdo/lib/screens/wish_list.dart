@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:pinkdo/database/sql.dart';
+import 'package:pinkdo/screens/Wish.dart';
 
 class WishList extends StatefulWidget {
   @override
@@ -11,7 +12,14 @@ class _WishListState extends State<WishList> {
   Sqldb sqldb = Sqldb();
 
   Future<List<Map>> readData() async {
-    List<Map> data = await sqldb.readData("SELECT * FROM wishes");
+    List<Map> data =
+        await sqldb.readData("SELECT * FROM wishes WHERE completed = 0");
+    return data;
+  }
+
+  Future<List<Map>> readCompleted() async {
+    List<Map> data =
+        await sqldb.readData("SELECT * FROM wishes WHERE completed = 1");
     return data;
   }
 
@@ -25,10 +33,10 @@ class _WishListState extends State<WishList> {
     setState(() {});
   }
 
-  double calculateCompletionPercentage(List<Map> wishes) {
-    if (wishes.isEmpty) return 0.0;
-    int completedTasks = wishes.where((wish) => wish['completed'] == 1).length;
-    return completedTasks / wishes.length;
+  double calculateCompletionPercentage(List<Map> wishes, List<Map> completedwishes) {
+    int totalwishes = wishes.length + completedwishes.length;
+    if (totalwishes == 0) return 0.0;
+    return completedwishes.length / totalwishes;
   }
 
   @override
@@ -86,22 +94,26 @@ class _WishListState extends State<WishList> {
             end: Alignment.bottomCenter,
           ),
         ),
-        child: Padding(
+        child:  Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-          child: FutureBuilder(
-            future: readData(),
-            builder: (BuildContext context, AsyncSnapshot<List<Map>> snapshot) {
+          child: FutureBuilder<List<List<Map>>>(
+            future: Future.wait([readData(), readCompleted()]),
+            builder: (BuildContext context,
+                AsyncSnapshot<List<List<Map>>> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(
                   child: CircularProgressIndicator(),
                 );
               } else if (snapshot.hasData) {
+                List<Map> wishes = snapshot.data![0];
+                List<Map> completedwishes = snapshot.data![1];
                 double completionPercentage =
-                    calculateCompletionPercentage(snapshot.data!);
+                    calculateCompletionPercentage(wishes, completedwishes);
+
                 return Column(
                   children: [
                     LinearPercentIndicator(
-                      lineHeight: 20.0,
+                      lineHeight: 20,
                       percent: completionPercentage,
                       center: Text(
                         "${(completionPercentage * 100).toStringAsFixed(1)}%",
@@ -113,22 +125,26 @@ class _WishListState extends State<WishList> {
                       barRadius: Radius.circular(10),
                     ),
                     SizedBox(height: 20),
-                    snapshot.data!.isEmpty
+                    wishes.isEmpty && completedwishes.isEmpty
                         ? Center(
                             child: Text(
-                              "No wishes available",
+                              "No tasks available",
                               style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 18,
-                              ),
+                                  color: Colors.grey[600], fontSize: 18),
                             ),
                           )
                         : Expanded(
                             child: ListView.builder(
-                              itemCount: snapshot.data!.length,
+                              itemCount:
+                                  wishes.length + completedwishes.length,
                               itemBuilder: (context, i) {
-                                bool isChecked =
-                                    snapshot.data![i]['completed'] == 1;
+                                Map wish = {};
+                                if (i >= wishes.length) {
+                                  wish = completedwishes[i - wishes.length];
+                                }else{
+                                  wish = wishes[i];
+                                }
+                                bool isChecked = wish['completed'] == 1;
                                 return Card(
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(15),
@@ -137,11 +153,9 @@ class _WishListState extends State<WishList> {
                                   margin: EdgeInsets.symmetric(vertical: 8),
                                   child: ListTile(
                                     contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 20,
-                                      vertical: 10,
-                                    ),
+                                        horizontal: 20, vertical: 10),
                                     title: Text(
-                                      "${snapshot.data![i]['wish']}",
+                                      "${wish['wish']}",
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 16,
@@ -167,8 +181,13 @@ class _WishListState extends State<WishList> {
                                             setState(() {
                                               isChecked = newValue;
                                             });
-                                            await sqldb.updateData(
-                                                "UPDATE wishes SET completed = ${newValue ? 1 : 0} WHERE id = ${snapshot.data![i]['id']}");
+                                            try {
+                                              await sqldb.updateData(
+                                                  "UPDATE wishes SET completed = ${newValue ? 1 : 0} WHERE id = ${wish['id']}");
+                                            } catch (e) {
+                                              print(
+                                                  "Error updating wish with id ${wish['id']}: $e");
+                                            }
                                           },
                                           activeColor: Colors.pink[300],
                                         ),
@@ -176,7 +195,7 @@ class _WishListState extends State<WishList> {
                                           icon: Icon(Icons.delete,
                                               color: Colors.pink.shade200),
                                           onPressed: () {
-                                            deleteWish(snapshot.data![i]['id']);
+                                            deleteWish(wish['id']);
                                           },
                                         ),
                                       ],
@@ -192,10 +211,7 @@ class _WishListState extends State<WishList> {
                 return Center(
                   child: Text(
                     "Error loading wishes",
-                    style: TextStyle(
-                      color: Colors.pink[200],
-                      fontSize: 18,
-                    ),
+                    style: TextStyle(color: Colors.pink[200], fontSize: 18),
                   ),
                 );
               }

@@ -11,24 +11,40 @@ class _TodoListState extends State<TodoList> {
   Sqldb sqldb = Sqldb();
 
   Future<List<Map>> readData() async {
-    List<Map> data = await sqldb.readData("SELECT * FROM tasks");
+    List<Map> data =
+        await sqldb.readData("SELECT * FROM tasks WHERE completed = 0");
+    return data;
+  }
+
+  Future<List<Map>> readCompleted() async {
+    List<Map> data =
+        await sqldb.readData("SELECT * FROM tasks WHERE completed = 1");
     return data;
   }
 
   void deleteTask(int id) async {
-    await sqldb.deleteData("DELETE FROM tasks WHERE id = $id");
-    setState(() {});
+    try {
+      await sqldb.deleteData("DELETE FROM tasks WHERE id = $id");
+      setState(() {});
+    } catch (e) {
+      print("Error deleting task with id $id: $e");
+    }
   }
 
   void deleteAllTasks() async {
-    await sqldb.deleteAllTasks();
-    setState(() {});
+    try {
+      await sqldb.deleteAllTasks();
+      setState(() {});
+    } catch (e) {
+      print("Error deleting all tasks: $e");
+    }
   }
 
-  double calculateCompletionPercentage(List<Map> tasks) {
-    if (tasks.isEmpty) return 0.0;
-    int completedTasks = tasks.where((task) => task['completed'] == 1).length;
-    return completedTasks / tasks.length;
+  double calculateCompletionPercentage(
+      List<Map> pendingTasks, List<Map> completedTasks) {
+    int totalTasks = pendingTasks.length + completedTasks.length;
+    if (totalTasks == 0) return 0.0;
+    return completedTasks.length / totalTasks;
   }
 
   @override
@@ -70,7 +86,9 @@ class _TodoListState extends State<TodoList> {
                         final result =
                             await Navigator.pushNamed(context, '/WishList');
                         if (result != null && result == true) {
-                          setState(() {Navigator.pop(context);});
+                          setState(() {
+                            Navigator.pop(context);
+                          });
                         }
                       },
                     ),
@@ -91,16 +109,20 @@ class _TodoListState extends State<TodoList> {
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-          child: FutureBuilder(
-            future: readData(),
-            builder: (BuildContext context, AsyncSnapshot<List<Map>> snapshot) {
+          child: FutureBuilder<List<List<Map>>>(
+            future: Future.wait([readData(), readCompleted()]),
+            builder: (BuildContext context,
+                AsyncSnapshot<List<List<Map>>> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(
                   child: CircularProgressIndicator(),
                 );
               } else if (snapshot.hasData) {
+                List<Map> pendingTasks = snapshot.data![0];
+                List<Map> completedTasks = snapshot.data![1];
                 double completionPercentage =
-                    calculateCompletionPercentage(snapshot.data!);
+                    calculateCompletionPercentage(pendingTasks, completedTasks);
+
                 return Column(
                   children: [
                     CircularPercentIndicator(
@@ -116,22 +138,26 @@ class _TodoListState extends State<TodoList> {
                       backgroundColor: Colors.pink[100]!,
                     ),
                     SizedBox(height: 20),
-                    snapshot.data!.isEmpty
+                    pendingTasks.isEmpty && completedTasks.isEmpty
                         ? Center(
                             child: Text(
                               "No tasks available",
                               style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 18,
-                              ),
+                                  color: Colors.grey[600], fontSize: 18),
                             ),
                           )
                         : Expanded(
                             child: ListView.builder(
-                              itemCount: snapshot.data!.length,
+                              itemCount:
+                                  pendingTasks.length + completedTasks.length,
                               itemBuilder: (context, i) {
-                                bool isChecked =
-                                    snapshot.data![i]['completed'] == 1;
+                                Map task = {};
+                                if (i >= pendingTasks.length) {
+                                  task = completedTasks[i - pendingTasks.length];
+                                }else{
+                                  task = pendingTasks[i];
+                                }
+                                bool isChecked = task['completed'] == 1;
                                 return Card(
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(15),
@@ -140,11 +166,9 @@ class _TodoListState extends State<TodoList> {
                                   margin: EdgeInsets.symmetric(vertical: 8),
                                   child: ListTile(
                                     contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 20,
-                                      vertical: 10,
-                                    ),
+                                        horizontal: 20, vertical: 10),
                                     title: Text(
-                                      "${snapshot.data![i]['task']}",
+                                      "${task['task']}",
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 16,
@@ -157,12 +181,10 @@ class _TodoListState extends State<TodoList> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        if (snapshot.data![i]['DeadLine'] !=
-                                                null &&
-                                            snapshot.data![i]['DeadLine']
-                                                .isNotEmpty)
+                                        if (task['DeadLine'] != null &&
+                                            task['DeadLine'].isNotEmpty)
                                           Text(
-                                            "DeadLine: ${snapshot.data![i]['DeadLine']}",
+                                            "DeadLine: ${task['DeadLine']}",
                                             style: TextStyle(
                                                 color: Colors.pink[300]),
                                           ),
@@ -185,8 +207,13 @@ class _TodoListState extends State<TodoList> {
                                             setState(() {
                                               isChecked = newValue;
                                             });
-                                            await sqldb.updateData(
-                                                "UPDATE tasks SET completed = ${newValue ? 1 : 0} WHERE id = ${snapshot.data![i]['id']}");
+                                            try {
+                                              await sqldb.updateData(
+                                                  "UPDATE tasks SET completed = ${newValue ? 1 : 0} WHERE id = ${task['id']}");
+                                            } catch (e) {
+                                              print(
+                                                  "Error updating task with id ${task['id']}: $e");
+                                            }
                                           },
                                           activeColor: Colors.pink[300],
                                         ),
@@ -194,7 +221,7 @@ class _TodoListState extends State<TodoList> {
                                           icon: Icon(Icons.delete,
                                               color: Colors.pink.shade200),
                                           onPressed: () {
-                                            deleteTask(snapshot.data![i]['id']);
+                                            deleteTask(task['id']);
                                           },
                                         ),
                                       ],
@@ -210,10 +237,7 @@ class _TodoListState extends State<TodoList> {
                 return Center(
                   child: Text(
                     "Error loading tasks",
-                    style: TextStyle(
-                      color: Colors.pink[200],
-                      fontSize: 18,
-                    ),
+                    style: TextStyle(color: Colors.pink[200], fontSize: 18),
                   ),
                 );
               }
