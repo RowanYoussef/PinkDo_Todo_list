@@ -1,51 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Add this import for date formatting
 import 'package:pinkdo/database/sql.dart';
 
-class Task extends StatefulWidget {
+class Wish extends StatefulWidget {
   @override
-  State<Task> createState() => _TaskState();
+  State<Wish> createState() => _WishState();
 }
 
-class _TaskState extends State<Task> {
+class _WishState extends State<Wish> {
   TextEditingController titleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
-  TextEditingController deadlineController = TextEditingController();
-  DateTime? selectedDate;
   Sqldb sqldb = Sqldb();
 
-  void selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: selectedDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2100),
-    );
-    if (picked != null && picked != selectedDate) {
-      setState(() {
-        selectedDate = picked;
-        deadlineController.text =
-            DateFormat('yyyy-MM-dd').format(selectedDate!);
-      });
-    }
-  }
-
-  void saveTask() async {
+  void saveWish() async {
     try {
       String title = titleController.text.trim();
-      String description = descriptionController.text.trim();
-
-      String? deadline = deadlineController.text;
+      String description = descriptionController.text.trim();;
 
       if (title.isNotEmpty) {
         int response = await sqldb.insertData(
-            "INSERT INTO tasks (task, completed, description, deadline) VALUES ('$title', 0, '$description', '$deadline')");
-        if (response > 0) {
-          Navigator.pop(context, true);
-        }
+          "INSERT INTO wishes (wish, completed, description) VALUES ('$title', 0, '$description')"
+        );
+        if (response > 0) 
+            Navigator.pop(context, true); 
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Please enter a title for the task.'),
+          content: Text('Please enter a title for the wish.'),
           backgroundColor: Colors.pink[200],
         ));
       }
@@ -67,7 +46,7 @@ class _TaskState extends State<Task> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Task Details', style: TextStyle(color: Colors.white)),
+        title: Text('Wish Details', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.pink[300],
         elevation: 0,
         centerTitle: true,
@@ -120,44 +99,21 @@ class _TaskState extends State<Task> {
                   ),
                 ),
               ),
-              SizedBox(height: 15),
-              TextField(
-                controller: deadlineController,
-                style: textStyle,
-                decoration: InputDecoration(
-                  labelText: 'Deadline',
-                  labelStyle: textStyle,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.pink[300]!),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(Icons.calendar_today),
-                    onPressed: () {
-                      selectDate(context);
-                    },
-                  ),
-                ),
-                readOnly: true,
-              ),
               SizedBox(height: 30),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   ElevatedButton(
                     onPressed: () {
-                      saveTask();
+                      saveWish();
                     },
                     child: Text(
                       'Save',
                       textScaleFactor: 1.5,
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.pink[300],
-                      foregroundColor: Colors.white,
+                      backgroundColor:  Colors.pink[300],
+                      foregroundColor:  Colors.white,
                       padding: EdgeInsets.symmetric(vertical: 15),
                       textStyle: TextStyle(
                         fontSize: 10,
@@ -170,15 +126,14 @@ class _TaskState extends State<Task> {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      // Add your delete logic here if needed
                     },
                     child: Text(
                       'Delete',
                       textScaleFactor: 1.5,
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.pink[300],
-                      foregroundColor: Colors.white,
+                    backgroundColor:  Colors.pink[300],
+                      foregroundColor:  Colors.white,
                       padding: EdgeInsets.symmetric(vertical: 15),
                       textStyle: TextStyle(
                         fontSize: 10,

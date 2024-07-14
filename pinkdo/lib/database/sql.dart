@@ -27,7 +27,15 @@ class Sqldb {
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
     "task" TEXT NOT NULL,
     "completed" INTEGER,
-    "priority" TEXT,
+    "Description" Text,
+    "DeadLine" Text
+   )
+   ''');
+    await db.execute('''
+    CREATE TABLE "wishes" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
+    "wish" TEXT NOT NULL,
+    "completed" INTEGER,
     "Description" Text
    )
    ''');
@@ -46,7 +54,7 @@ class Sqldb {
     return response;
   }
 
-  //insery function
+  //insert function
   insertData(String value) async {
     Database? mydb = await db;
     int response = await mydb!.rawInsert(value);
@@ -80,4 +88,12 @@ class Sqldb {
      int response = await mydb!.rawDelete("DELETE FROM tasks");
      await mydb!.execute("UPDATE sqlite_sequence SET seq = 0 WHERE name = 'tasks'");
   }
+  
+  //Delete all wishes
+    Future<void> deleteAllwishes(String s) async {
+     Database?mydb = await db;
+     int response = await mydb!.rawDelete("DELETE FROM wishes");
+     await mydb!.execute("UPDATE sqlite_sequence SET seq = 0 WHERE name = 'wishes'");
+  }
+
 }

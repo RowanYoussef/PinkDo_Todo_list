@@ -2,33 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:pinkdo/database/sql.dart';
 
-class TodoList extends StatefulWidget {
+class WishList extends StatefulWidget {
   @override
-  State<TodoList> createState() => _TodoListState();
+  State<WishList> createState() => _WishListState();
 }
 
-class _TodoListState extends State<TodoList> {
+class _WishListState extends State<WishList> {
   Sqldb sqldb = Sqldb();
 
   Future<List<Map>> readData() async {
-    List<Map> data = await sqldb.readData("SELECT * FROM tasks");
+    List<Map> data = await sqldb.readData("SELECT * FROM wishes");
     return data;
   }
 
-  void deleteTask(int id) async {
-    await sqldb.deleteData("DELETE FROM tasks WHERE id = $id");
+  void deleteWish(int id) async {
+    await sqldb.deleteData("DELETE FROM wishes WHERE id = $id");
     setState(() {});
   }
 
-  void deleteAllTasks() async {
-    await sqldb.deleteAllTasks();
+  void deleteAllwishes() async {
+    await sqldb.deleteAllwishes("DELETE FROM wishes"); 
     setState(() {});
   }
 
-  double calculateCompletionPercentage(List<Map> tasks) {
-    if (tasks.isEmpty) return 0.0;
-    int completedTasks = tasks.where((task) => task['completed'] == 1).length;
-    return completedTasks / tasks.length;
+  double calculateCompletionPercentage(List<Map> wishes) {
+    if (wishes.isEmpty) return 0.0;
+    int completedTasks = wishes.where((wish) => wish['completed'] == 1).length;
+    return completedTasks / wishes.length;
   }
 
   @override
@@ -36,7 +36,7 @@ class _TodoListState extends State<TodoList> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'My Tasks',
+          'My Wishes',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.pink[300],
@@ -55,23 +55,20 @@ class _TodoListState extends State<TodoList> {
                   children: <Widget>[
                     ListTile(
                       leading: Icon(Icons.delete, color: Colors.pink[200]),
-                      title: Text('Delete All Tasks',
+                      title: Text('Delete All Wishes',
                           style: TextStyle(color: Colors.pink[200])),
                       onTap: () {
-                        deleteAllTasks();
-                        Navigator.pop(context);
+                        deleteAllwishes();
+                        Navigator.pop(context); // Close the popup menu
                       },
                     ),
                     ListTile(
-                      leading: Icon(Icons.star, color: Colors.pink[200]),
-                      title: Text('Your Wishes',
+                      leading: Icon(Icons.task, color: Colors.pink[200]),
+                      title: Text('Your Tasks',
                           style: TextStyle(color: Colors.pink[200])),
                       onTap: () async {
-                        final result =
-                            await Navigator.pushNamed(context, '/WishList');
-                        if (result != null && result == true) {
-                          setState(() {Navigator.pop(context);});
-                        }
+                        Navigator.pop(context); // Close the popup menu
+                        Navigator.pop(context, true); // Return to previous screen
                       },
                     ),
                   ],
@@ -103,23 +100,23 @@ class _TodoListState extends State<TodoList> {
                     calculateCompletionPercentage(snapshot.data!);
                 return Column(
                   children: [
-                    CircularPercentIndicator(
-                      radius: 60.0,
-                      lineWidth: 10.0,
+                    LinearPercentIndicator(
+                      lineHeight: 20.0,
                       percent: completionPercentage,
                       center: Text(
                         "${(completionPercentage * 100).toStringAsFixed(1)}%",
                         style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 20.0),
+                            fontWeight: FontWeight.bold, fontSize: 14.0),
                       ),
                       progressColor: Colors.pink[300],
                       backgroundColor: Colors.pink[100]!,
+                      barRadius: Radius.circular(10),
                     ),
                     SizedBox(height: 20),
                     snapshot.data!.isEmpty
                         ? Center(
                             child: Text(
-                              "No tasks available",
+                              "No wishes available",
                               style: TextStyle(
                                 color: Colors.grey[600],
                                 fontSize: 18,
@@ -144,7 +141,7 @@ class _TodoListState extends State<TodoList> {
                                       vertical: 10,
                                     ),
                                     title: Text(
-                                      "${snapshot.data![i]['task']}",
+                                      "${snapshot.data![i]['wish']}",
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 16,
@@ -153,25 +150,10 @@ class _TodoListState extends State<TodoList> {
                                             : Colors.black,
                                       ),
                                     ),
-                                    subtitle: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        if (snapshot.data![i]['DeadLine'] !=
-                                                null &&
-                                            snapshot.data![i]['DeadLine']
-                                                .isNotEmpty)
-                                          Text(
-                                            "DeadLine: ${snapshot.data![i]['DeadLine']}",
-                                            style: TextStyle(
-                                                color: Colors.pink[300]),
-                                          ),
-                                      ],
-                                    ),
                                     leading: CircleAvatar(
                                       backgroundColor: Colors.pink[200],
                                       child: Icon(
-                                        Icons.task,
+                                        Icons.star,
                                         color: Colors.white,
                                       ),
                                     ),
@@ -186,7 +168,7 @@ class _TodoListState extends State<TodoList> {
                                               isChecked = newValue;
                                             });
                                             await sqldb.updateData(
-                                                "UPDATE tasks SET completed = ${newValue ? 1 : 0} WHERE id = ${snapshot.data![i]['id']}");
+                                                "UPDATE wishes SET completed = ${newValue ? 1 : 0} WHERE id = ${snapshot.data![i]['id']}");
                                           },
                                           activeColor: Colors.pink[300],
                                         ),
@@ -194,7 +176,7 @@ class _TodoListState extends State<TodoList> {
                                           icon: Icon(Icons.delete,
                                               color: Colors.pink.shade200),
                                           onPressed: () {
-                                            deleteTask(snapshot.data![i]['id']);
+                                            deleteWish(snapshot.data![i]['id']);
                                           },
                                         ),
                                       ],
@@ -209,7 +191,7 @@ class _TodoListState extends State<TodoList> {
               } else {
                 return Center(
                   child: Text(
-                    "Error loading tasks",
+                    "Error loading wishes",
                     style: TextStyle(
                       color: Colors.pink[200],
                       fontSize: 18,
@@ -223,7 +205,7 @@ class _TodoListState extends State<TodoList> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final result = await Navigator.pushNamed(context, '/Task');
+          final result = await Navigator.pushNamed(context, '/Wish');
           if (result != null) {
             setState(() {});
           }
@@ -235,3 +217,4 @@ class _TodoListState extends State<TodoList> {
     );
   }
 }
+
