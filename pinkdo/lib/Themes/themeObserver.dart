@@ -11,7 +11,7 @@ class ThemeProvider extends InheritedNotifier<ThemeNotifier> {
     required this.themeNotifier,
   }) : super(key: key, notifier: themeNotifier, child: child);
 
-  static ThemeNotifier of(BuildContext context) =>
+  static ThemeNotifier of(BuildContext context, {required bool listen}) =>
       context.dependOnInheritedWidgetOfExactType<ThemeProvider>()!.notifier!;
 
   @override

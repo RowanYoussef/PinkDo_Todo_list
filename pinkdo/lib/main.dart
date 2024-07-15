@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 void main() {
   runApp(
     ChangeNotifierProvider(
-      create: (_) => ThemeNotifier(), // Initialize ThemeNotifier
+      create: (_) => ThemeNotifier(),
       child: MyApp(),
     ),
   );

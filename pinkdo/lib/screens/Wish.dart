@@ -25,14 +25,14 @@ class _WishState extends State<Wish> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Please enter a title for the wish.'),
-          backgroundColor: Colors.pink[200],
+          backgroundColor: Theme.of(context).colorScheme.primary,
         ));
       }
     } catch (e) {
       print("Error: $e");
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('An error occurred. Please try again later.'),
-        backgroundColor: Colors.pink[200],
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ));
     }
   }
@@ -47,7 +47,7 @@ class _WishState extends State<Wish> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Wish Details', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.pink[300],
+        backgroundColor: Theme.of(context).primaryColor,
         elevation: 0,
         centerTitle: true,
         shape: RoundedRectangleBorder(
@@ -59,7 +59,7 @@ class _WishState extends State<Wish> {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.pink[50]!, Colors.pink[100]!],
+            colors: [Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.secondary],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -94,7 +94,7 @@ class _WishState extends State<Wish> {
                     borderRadius: BorderRadius.circular(15),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.pink[300]!),
+                    borderSide: BorderSide(color: Theme.of(context).primaryColor),
                     borderRadius: BorderRadius.circular(15),
                   ),
                 ),
@@ -112,7 +112,7 @@ class _WishState extends State<Wish> {
                       textScaleFactor: 1.5,
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:  Colors.pink[300],
+                      backgroundColor:  Theme.of(context).primaryColor,
                       foregroundColor:  Colors.white,
                       padding: EdgeInsets.symmetric(vertical: 15),
                       textStyle: TextStyle(
@@ -132,7 +132,7 @@ class _WishState extends State<Wish> {
                       textScaleFactor: 1.5,
                     ),
                     style: ElevatedButton.styleFrom(
-                    backgroundColor:  Colors.pink[300],
+                    backgroundColor:  Theme.of(context).primaryColor,
                       foregroundColor:  Colors.white,
                       padding: EdgeInsets.symmetric(vertical: 15),
                       textStyle: TextStyle(

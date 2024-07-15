@@ -10,4 +10,7 @@ class ThemeNotifier extends ChangeNotifier {
     _currentTheme =  _currentTheme == MyAppThemes().blueTheme ? MyAppThemes().PinkTheme : MyAppThemes().blueTheme;
     notifyListeners(); 
   }
+    bool isBlue() {
+    return _currentTheme == MyAppThemes().blueTheme;
+  }
 }

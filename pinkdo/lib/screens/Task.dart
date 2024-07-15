@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Add this import for date formatting
+import 'package:intl/intl.dart';
 import 'package:pinkdo/database/sql.dart';
+import 'package:pinkdo/Themes/theme.dart';
+import 'package:pinkdo/Themes/themeNotifier.dart';
+import 'package:pinkdo/database/sql.dart';
+import 'package:provider/provider.dart';
 
 class Task extends StatefulWidget {
   @override
@@ -46,14 +50,14 @@ class _TaskState extends State<Task> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Please enter a title for the task.'),
-          backgroundColor: Colors.pink[200],
+          backgroundColor: Theme.of(context).colorScheme.primary,
         ));
       }
     } catch (e) {
       print("Error: $e");
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('An error occurred. Please try again later.'),
-        backgroundColor: Colors.pink[200],
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ));
     }
   }
@@ -68,7 +72,7 @@ class _TaskState extends State<Task> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Task Details', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.pink[300],
+        backgroundColor: Theme.of(context).primaryColor,
         elevation: 0,
         centerTitle: true,
         shape: RoundedRectangleBorder(
@@ -80,7 +84,7 @@ class _TaskState extends State<Task> {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.pink[50]!, Colors.pink[100]!],
+            colors: [ ThemeData().colorScheme.surface,Theme.of(context).colorScheme.secondary],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -99,7 +103,7 @@ class _TaskState extends State<Task> {
                     borderRadius: BorderRadius.circular(15),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.pink[300]!),
+                    borderSide: BorderSide(color: Theme.of(context).primaryColor),
                     borderRadius: BorderRadius.circular(15),
                   ),
                 ),
@@ -115,7 +119,7 @@ class _TaskState extends State<Task> {
                     borderRadius: BorderRadius.circular(15),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.pink[300]!),
+                    borderSide: BorderSide(color: Theme.of(context).primaryColor!),
                     borderRadius: BorderRadius.circular(15),
                   ),
                 ),
@@ -131,7 +135,7 @@ class _TaskState extends State<Task> {
                     borderRadius: BorderRadius.circular(15),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.pink[300]!),
+                    borderSide: BorderSide(color: Theme.of(context).primaryColor),
                     borderRadius: BorderRadius.circular(15),
                   ),
                   suffixIcon: IconButton(
@@ -156,7 +160,7 @@ class _TaskState extends State<Task> {
                       textScaleFactor: 1.5,
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.pink[300],
+                      backgroundColor: Theme.of(context).primaryColor,
                       foregroundColor: Colors.white,
                       padding: EdgeInsets.symmetric(vertical: 15),
                       textStyle: TextStyle(
@@ -177,7 +181,7 @@ class _TaskState extends State<Task> {
                       textScaleFactor: 1.5,
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.pink[300],
+                      backgroundColor: Theme.of(context).primaryColor,
                       foregroundColor: Colors.white,
                       padding: EdgeInsets.symmetric(vertical: 15),
                       textStyle: TextStyle(
