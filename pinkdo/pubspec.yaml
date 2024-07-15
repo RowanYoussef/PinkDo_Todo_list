@@ -43,6 +43,7 @@ dev_dependencies:
   percent_indicator: ^4.2.2
   intl: ^0.17.0 
   provider: ^5.0.0
+  shared_preferences: ^2.0.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pinkdo/database/sql.dart';
-import 'package:pinkdo/Themes/theme.dart';
-import 'package:pinkdo/Themes/themeNotifier.dart';
-import 'package:pinkdo/database/sql.dart';
-import 'package:provider/provider.dart';
 
 class Task extends StatefulWidget {
   @override
@@ -84,7 +80,10 @@ class _TaskState extends State<Task> {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [ ThemeData().colorScheme.surface,Theme.of(context).colorScheme.secondary],
+            colors: [
+              ThemeData().colorScheme.surface,
+              Theme.of(context).colorScheme.secondary
+            ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -103,7 +102,8 @@ class _TaskState extends State<Task> {
                     borderRadius: BorderRadius.circular(15),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                    borderSide:
+                        BorderSide(color: Theme.of(context).primaryColor),
                     borderRadius: BorderRadius.circular(15),
                   ),
                 ),
@@ -119,7 +119,8 @@ class _TaskState extends State<Task> {
                     borderRadius: BorderRadius.circular(15),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Theme.of(context).primaryColor!),
+                    borderSide:
+                        BorderSide(color: Theme.of(context).primaryColor!),
                     borderRadius: BorderRadius.circular(15),
                   ),
                 ),
@@ -135,7 +136,8 @@ class _TaskState extends State<Task> {
                     borderRadius: BorderRadius.circular(15),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                    borderSide:
+                        BorderSide(color: Theme.of(context).primaryColor),
                     borderRadius: BorderRadius.circular(15),
                   ),
                   suffixIcon: IconButton(
@@ -174,10 +176,10 @@ class _TaskState extends State<Task> {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      // Add your delete logic here if needed
+                      Navigator.pop(context, true);
                     },
                     child: Text(
-                      'Delete',
+                      'Cancel',
                       textScaleFactor: 1.5,
                     ),
                     style: ElevatedButton.styleFrom(

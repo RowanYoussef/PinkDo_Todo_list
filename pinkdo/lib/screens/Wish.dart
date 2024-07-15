@@ -14,14 +14,13 @@ class _WishState extends State<Wish> {
   void saveWish() async {
     try {
       String title = titleController.text.trim();
-      String description = descriptionController.text.trim();;
+      String description = descriptionController.text.trim();
+      ;
 
       if (title.isNotEmpty) {
         int response = await sqldb.insertData(
-          "INSERT INTO wishes (wish, completed, description) VALUES ('$title', 0, '$description')"
-        );
-        if (response > 0) 
-            Navigator.pop(context, true); 
+            "INSERT INTO wishes (wish, completed, description) VALUES ('$title', 0, '$description')");
+        if (response > 0) Navigator.pop(context, true);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Please enter a title for the wish.'),
@@ -59,7 +58,10 @@ class _WishState extends State<Wish> {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.secondary],
+            colors: [
+              Theme.of(context).colorScheme.surface,
+              Theme.of(context).colorScheme.secondary
+            ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -94,7 +96,8 @@ class _WishState extends State<Wish> {
                     borderRadius: BorderRadius.circular(15),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                    borderSide:
+                        BorderSide(color: Theme.of(context).primaryColor),
                     borderRadius: BorderRadius.circular(15),
                   ),
                 ),
@@ -112,8 +115,8 @@ class _WishState extends State<Wish> {
                       textScaleFactor: 1.5,
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:  Theme.of(context).primaryColor,
-                      foregroundColor:  Colors.white,
+                      backgroundColor: Theme.of(context).primaryColor,
+                      foregroundColor: Colors.white,
                       padding: EdgeInsets.symmetric(vertical: 15),
                       textStyle: TextStyle(
                         fontSize: 10,
@@ -126,14 +129,15 @@ class _WishState extends State<Wish> {
                   ),
                   ElevatedButton(
                     onPressed: () {
+                      Navigator.pop(context, true);
                     },
                     child: Text(
-                      'Delete',
+                      'Cancel',
                       textScaleFactor: 1.5,
                     ),
                     style: ElevatedButton.styleFrom(
-                    backgroundColor:  Theme.of(context).primaryColor,
-                      foregroundColor:  Colors.white,
+                      backgroundColor: Theme.of(context).primaryColor,
+                      foregroundColor: Colors.white,
                       padding: EdgeInsets.symmetric(vertical: 15),
                       textStyle: TextStyle(
                         fontSize: 10,

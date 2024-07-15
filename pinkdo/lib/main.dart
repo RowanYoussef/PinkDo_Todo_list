@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pinkdo/Themes/theme.dart';
 import 'package:pinkdo/Themes/themeNotifier.dart';
-import 'package:pinkdo/database/sql.dart';
 import 'package:pinkdo/screens/Task.dart';
 import 'package:pinkdo/screens/TodoList.dart';
 import 'package:pinkdo/screens/Wish.dart';

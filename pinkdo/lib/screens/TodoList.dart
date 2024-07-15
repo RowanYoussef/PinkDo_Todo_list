@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:pinkdo/Themes/theme.dart';
 import 'package:pinkdo/Themes/themeNotifier.dart';
 import 'package:pinkdo/database/sql.dart';
 import 'package:provider/provider.dart';
@@ -26,21 +25,52 @@ class _TodoListState extends State<TodoList> {
   }
 
   void deleteTask(int id) async {
-    try {
-      await sqldb.deleteData("DELETE FROM tasks WHERE id = $id");
-      setState(() {});
-    } catch (e) {
-      print("Error deleting task with id $id: $e");
-    }
+    await sqldb.deleteData("DELETE FROM tasks WHERE id = $id");
+    setState(() {});
   }
 
   void deleteAllTasks() async {
-    try {
-      await sqldb.deleteAllTasks();
-      setState(() {});
-    } catch (e) {
-      print("Error deleting all tasks: $e");
-    }
+    await sqldb.deleteAllTasks();
+    setState(() {});
+  }
+
+  void openTask(Map task) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                task['task'],
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold,color: Theme.of(context).primaryColor),
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Deadline: ${task['DeadLine'] ?? 'No deadline'}',
+                style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.primary),
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Description: ${task['description'] ?? 'No description'}',
+                style: TextStyle(fontSize: 16),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text("Close"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   double calculateCompletionPercentage(
@@ -72,8 +102,7 @@ class _TodoListState extends State<TodoList> {
             ),
             actions: [
               PopupMenuButton<String>(
-                itemBuilder: (BuildContext context) =>
-                    <PopupMenuEntry<String>>[
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                   PopupMenuItem<String>(
                     child: Column(
                       children: <Widget>[
@@ -107,15 +136,18 @@ class _TodoListState extends State<TodoList> {
                           },
                         ),
                         ListTile(
-                          leading: Icon(Icons.color_lens,
+                          leading: Icon( themeNotifier.isBlue() ? Icons.girl: Icons.boy,
                               color: Theme.of(context).colorScheme.primary),
-                          title: Text(themeNotifier.isBlue() ? "Pink mode" : "Blue mode",
+                          title: Text(
+                              themeNotifier.isBlue()
+                                  ? "Pink mode"
+                                  : "Blue mode",
                               style: TextStyle(
                                   color:
                                       Theme.of(context).colorScheme.primary)),
                           onTap: () {
                             themeNotifier.toggleTheme();
-                             Navigator.pop(context);
+                            Navigator.pop(context);
                           },
                         ),
                       ],
@@ -150,9 +182,8 @@ class _TodoListState extends State<TodoList> {
                   } else if (snapshot.hasData) {
                     List<Map> pendingTasks = snapshot.data![0];
                     List<Map> completedTasks = snapshot.data![1];
-                    double completionPercentage =
-                        calculateCompletionPercentage(
-                            pendingTasks, completedTasks);
+                    double completionPercentage = calculateCompletionPercentage(
+                        pendingTasks, completedTasks);
 
                     return Column(
                       children: [
@@ -180,8 +211,8 @@ class _TodoListState extends State<TodoList> {
                               )
                             : Expanded(
                                 child: ListView.builder(
-                                  itemCount:
-                                      pendingTasks.length + completedTasks.length,
+                                  itemCount: pendingTasks.length +
+                                      completedTasks.length,
                                   itemBuilder: (context, i) {
                                     Map task = {};
                                     if (i >= pendingTasks.length) {
@@ -192,13 +223,16 @@ class _TodoListState extends State<TodoList> {
                                     }
                                     bool isChecked = task['completed'] == 1;
                                     return Card(
+                                      color: Colors.white,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(15),
                                       ),
                                       elevation: 5,
-                                      margin:
-                                          EdgeInsets.symmetric(vertical: 8),
+                                      margin: EdgeInsets.symmetric(vertical: 8),
                                       child: ListTile(
+                                        onTap: () {
+                                          openTask(task);
+                                        },
                                         contentPadding: EdgeInsets.symmetric(
                                             horizontal: 20, vertical: 10),
                                         title: Text(
@@ -227,7 +261,8 @@ class _TodoListState extends State<TodoList> {
                                         ),
                                         leading: CircleAvatar(
                                           backgroundColor: Theme.of(context)
-                                              .colorScheme.primary,
+                                              .colorScheme
+                                              .primary,
                                           child: Icon(
                                             Icons.task,
                                             color: Colors.white,
@@ -247,12 +282,11 @@ class _TodoListState extends State<TodoList> {
                                                   await sqldb.updateData(
                                                       "UPDATE tasks SET completed = ${newValue ? 1 : 0} WHERE id = ${task['id']}");
                                                 } catch (e) {
-                                                  print(
-                                                      "Error updating task with id ${task['id']}: $e");
+                                                  print("$e");
                                                 }
                                               },
-                                              activeColor:
-                                                  Theme.of(context).primaryColor,
+                                              activeColor: Theme.of(context)
+                                                  .primaryColor,
                                             ),
                                             IconButton(
                                               icon: Icon(Icons.delete,
@@ -302,4 +336,3 @@ class _TodoListState extends State<TodoList> {
     );
   }
 }
-
