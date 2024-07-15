@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:pinkdo/Themes/theme.dart';
 import 'package:pinkdo/database/sql.dart';
 
 class TodoList extends StatefulWidget {
@@ -8,6 +9,7 @@ class TodoList extends StatefulWidget {
 }
 
 class _TodoListState extends State<TodoList> {
+  bool isblue = false;
   Sqldb sqldb = Sqldb();
 
   Future<List<Map>> readData() async {
@@ -47,15 +49,22 @@ class _TodoListState extends State<TodoList> {
     return completedTasks.length / totalTasks;
   }
 
+  void toggleTheme() {
+    setState(() {
+      isblue = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    ThemeData currentTheme = MyAppThemes().getTheme(isblue);
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'My Tasks',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.pink[300],
+        backgroundColor: currentTheme.primaryColor,
         elevation: 0,
         centerTitle: true,
         shape: RoundedRectangleBorder(
@@ -70,18 +79,22 @@ class _TodoListState extends State<TodoList> {
                 child: Column(
                   children: <Widget>[
                     ListTile(
-                      leading: Icon(Icons.delete, color: Colors.pink[200]),
+                      leading: Icon(Icons.delete,
+                          color: Theme.of(context).colorScheme.primary),
                       title: Text('Delete All Tasks',
-                          style: TextStyle(color: Colors.pink[200])),
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary)),
                       onTap: () {
                         deleteAllTasks();
                         Navigator.pop(context);
                       },
                     ),
                     ListTile(
-                      leading: Icon(Icons.star, color: Colors.pink[200]),
+                      leading: Icon(Icons.star,
+                          color: Theme.of(context).colorScheme.primary),
                       title: Text('Your Wishes',
-                          style: TextStyle(color: Colors.pink[200])),
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary)),
                       onTap: () async {
                         final result =
                             await Navigator.pushNamed(context, '/WishList');
@@ -90,6 +103,16 @@ class _TodoListState extends State<TodoList> {
                             Navigator.pop(context);
                           });
                         }
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.star,
+                          color: Theme.of(context).colorScheme.primary),
+                      title: Text('Your Wishes',
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary)),
+                      onTap: () {
+                        toggleTheme();
                       },
                     ),
                   ],
@@ -102,7 +125,10 @@ class _TodoListState extends State<TodoList> {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.pink[50]!, Colors.pink[100]!],
+            colors: [
+              ThemeData().colorScheme.surface,
+              Theme.of(context).colorScheme.secondary
+            ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -134,8 +160,8 @@ class _TodoListState extends State<TodoList> {
                         style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 20.0),
                       ),
-                      progressColor: Colors.pink[300],
-                      backgroundColor: Colors.pink[100]!,
+                      progressColor: Theme.of(context).primaryColor,
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
                     ),
                     SizedBox(height: 20),
                     pendingTasks.isEmpty && completedTasks.isEmpty
@@ -153,8 +179,9 @@ class _TodoListState extends State<TodoList> {
                               itemBuilder: (context, i) {
                                 Map task = {};
                                 if (i >= pendingTasks.length) {
-                                  task = completedTasks[i - pendingTasks.length];
-                                }else{
+                                  task =
+                                      completedTasks[i - pendingTasks.length];
+                                } else {
                                   task = pendingTasks[i];
                                 }
                                 bool isChecked = task['completed'] == 1;
@@ -186,12 +213,14 @@ class _TodoListState extends State<TodoList> {
                                           Text(
                                             "DeadLine: ${task['DeadLine']}",
                                             style: TextStyle(
-                                                color: Colors.pink[300]),
+                                                color: Theme.of(context)
+                                                    .primaryColor),
                                           ),
                                       ],
                                     ),
                                     leading: CircleAvatar(
-                                      backgroundColor: Colors.pink[200],
+                                      backgroundColor:
+                                          Theme.of(context).colorScheme.primary,
                                       child: Icon(
                                         Icons.task,
                                         color: Colors.white,
@@ -215,11 +244,14 @@ class _TodoListState extends State<TodoList> {
                                                   "Error updating task with id ${task['id']}: $e");
                                             }
                                           },
-                                          activeColor: Colors.pink[300],
+                                          activeColor:
+                                              Theme.of(context).primaryColor,
                                         ),
                                         IconButton(
                                           icon: Icon(Icons.delete,
-                                              color: Colors.pink.shade200),
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary),
                                           onPressed: () {
                                             deleteTask(task['id']);
                                           },
@@ -237,7 +269,9 @@ class _TodoListState extends State<TodoList> {
                 return Center(
                   child: Text(
                     "Error loading tasks",
-                    style: TextStyle(color: Colors.pink[200], fontSize: 18),
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontSize: 18),
                   ),
                 );
               }
@@ -252,7 +286,7 @@ class _TodoListState extends State<TodoList> {
             setState(() {});
           }
         },
-        backgroundColor: Colors.pink[300],
+        backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
         child: Icon(Icons.add),
       ),
