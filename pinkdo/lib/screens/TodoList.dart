@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:pinkdo/Themes/themeNotifier.dart';
 import 'package:pinkdo/database/sql.dart';
+import 'package:pinkdo/logic/todo_list_logic.dart';
 import 'package:provider/provider.dart';
 
 class TodoList extends StatefulWidget {
@@ -11,74 +12,7 @@ class TodoList extends StatefulWidget {
 
 class _TodoListState extends State<TodoList> {
   Sqldb sqldb = Sqldb();
-
-  Future<List<Map>> readData() async {
-    List<Map> data =
-        await sqldb.readData("SELECT * FROM tasks WHERE completed = 0");
-    return data;
-  }
-
-  Future<List<Map>> readCompleted() async {
-    List<Map> data =
-        await sqldb.readData("SELECT * FROM tasks WHERE completed = 1");
-    return data;
-  }
-
-  void deleteTask(int id) async {
-    await sqldb.deleteData("DELETE FROM tasks WHERE id = $id");
-    setState(() {});
-  }
-
-  void deleteAllTasks() async {
-    await sqldb.deleteAllTasks();
-    setState(() {});
-  }
-
-  void openTask(Map task) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                task['task'],
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold,color: Theme.of(context).primaryColor),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Deadline: ${task['DeadLine'] ?? 'No deadline'}',
-                style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.primary),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Description: ${task['description'] ?? 'No description'}',
-                style: TextStyle(fontSize: 16),
-              ),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text("Close"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  double calculateCompletionPercentage(
-      List<Map> pendingTasks, List<Map> completedTasks) {
-    int totalTasks = pendingTasks.length + completedTasks.length;
-    if (totalTasks == 0) return 0.0;
-    return completedTasks.length / totalTasks;
-  }
+  TodoListLogic todoListLogic = TodoListLogic();
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +48,8 @@ class _TodoListState extends State<TodoList> {
                                   color:
                                       Theme.of(context).colorScheme.primary)),
                           onTap: () {
-                            deleteAllTasks();
+                            todoListLogic.deleteAllTasks();
+                            setState(() {});
                             Navigator.pop(context);
                           },
                         ),
@@ -136,7 +71,8 @@ class _TodoListState extends State<TodoList> {
                           },
                         ),
                         ListTile(
-                          leading: Icon( themeNotifier.isBlue() ? Icons.girl: Icons.boy,
+                          leading: Icon(
+                              themeNotifier.isBlue() ? Icons.girl : Icons.boy,
                               color: Theme.of(context).colorScheme.primary),
                           title: Text(
                               themeNotifier.isBlue()
@@ -172,7 +108,8 @@ class _TodoListState extends State<TodoList> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
               child: FutureBuilder<List<List<Map>>>(
-                future: Future.wait([readData(), readCompleted()]),
+                future: Future.wait(
+                    [todoListLogic.readData(), todoListLogic.readCompleted()]),
                 builder: (BuildContext context,
                     AsyncSnapshot<List<List<Map>>> snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -182,8 +119,9 @@ class _TodoListState extends State<TodoList> {
                   } else if (snapshot.hasData) {
                     List<Map> pendingTasks = snapshot.data![0];
                     List<Map> completedTasks = snapshot.data![1];
-                    double completionPercentage = calculateCompletionPercentage(
-                        pendingTasks, completedTasks);
+                    double completionPercentage =
+                        todoListLogic.calculateCompletionPercentage(
+                            pendingTasks, completedTasks);
 
                     return Column(
                       children: [
@@ -231,7 +169,7 @@ class _TodoListState extends State<TodoList> {
                                       margin: EdgeInsets.symmetric(vertical: 8),
                                       child: ListTile(
                                         onTap: () {
-                                          openTask(task);
+                                          todoListLogic.openTask(task, context);
                                         },
                                         contentPadding: EdgeInsets.symmetric(
                                             horizontal: 20, vertical: 10),
@@ -294,7 +232,9 @@ class _TodoListState extends State<TodoList> {
                                                       .colorScheme
                                                       .primary),
                                               onPressed: () {
-                                                deleteTask(task['id']);
+                                                todoListLogic
+                                                    .deleteTask(task['id']);
+                                                setState(() {});
                                               },
                                             ),
                                           ],

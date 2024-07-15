@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:pinkdo/Themes/themeNotifier.dart';
 import 'package:pinkdo/database/sql.dart';
+import 'package:pinkdo/logic/wish_list_logic.dart';
 import 'package:provider/provider.dart';
 
 class WishList extends StatefulWidget {
@@ -11,72 +12,7 @@ class WishList extends StatefulWidget {
 
 class _WishListState extends State<WishList> {
   Sqldb sqldb = Sqldb();
-
-  Future<List<Map>> readData() async {
-    List<Map> data =
-        await sqldb.readData("SELECT * FROM wishes WHERE completed = 0");
-    return data;
-  }
-
-  Future<List<Map>> readCompleted() async {
-    List<Map> data =
-        await sqldb.readData("SELECT * FROM wishes WHERE completed = 1");
-    return data;
-  }
-
-  void deleteWish(int id) async {
-    await sqldb.deleteData("DELETE FROM wishes WHERE id = $id");
-    setState(() {});
-  }
-
-  void deleteAllwishes() async {
-    await sqldb.deleteAllwishes("DELETE FROM wishes");
-    setState(() {});
-  }
-
-  double calculateCompletionPercentage(
-      List<Map> wishes, List<Map> completedwishes) {
-    int totalwishes = wishes.length + completedwishes.length;
-    if (totalwishes == 0) return 0.0;
-    return completedwishes.length / totalwishes;
-  }
-
-  void openWish(Map wish) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                wish['wish'],
-                style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).primaryColor),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Description: ${wish['description'] ?? 'No description'}',
-                style: TextStyle(fontSize: 16),
-              ),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text("Close"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+  WishListLogic wishListLogic = WishListLogic();
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +47,8 @@ class _WishListState extends State<WishList> {
                                   color:
                                       Theme.of(context).colorScheme.primary)),
                           onTap: () {
-                            deleteAllwishes();
+                            wishListLogic.deleteAllwishes();
+                            setState(() {});
                             Navigator.pop(context);
                           },
                         ),
@@ -128,7 +65,8 @@ class _WishListState extends State<WishList> {
                           },
                         ),
                         ListTile(
-                          leading: Icon(themeNotifier.isBlue() ? Icons.girl : Icons.boy,
+                          leading: Icon(
+                              themeNotifier.isBlue() ? Icons.girl : Icons.boy,
                               color: Theme.of(context).colorScheme.primary),
                           title: Text(
                               themeNotifier.isBlue()
@@ -164,7 +102,7 @@ class _WishListState extends State<WishList> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
               child: FutureBuilder<List<List<Map>>>(
-                future: Future.wait([readData(), readCompleted()]),
+                future: Future.wait([wishListLogic.readData(), wishListLogic.readCompleted()]),
                 builder: (BuildContext context,
                     AsyncSnapshot<List<List<Map>>> snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -175,7 +113,7 @@ class _WishListState extends State<WishList> {
                     List<Map> wishes = snapshot.data![0];
                     List<Map> completedwishes = snapshot.data![1];
                     double completionPercentage =
-                        calculateCompletionPercentage(wishes, completedwishes);
+                        wishListLogic.calculateCompletionPercentage(wishes, completedwishes);
 
                     return Column(
                       children: [
@@ -234,7 +172,7 @@ class _WishListState extends State<WishList> {
                                           ),
                                         ),
                                         onTap: () {
-                                          openWish(wish);
+                                          wishListLogic.openWish(wish,context);
                                         },
                                         leading: CircleAvatar(
                                           backgroundColor: Theme.of(context)
@@ -271,7 +209,8 @@ class _WishListState extends State<WishList> {
                                                       .colorScheme
                                                       .primary),
                                               onPressed: () {
-                                                deleteWish(wish['id']);
+                                                wishListLogic.deleteWish(wish['id']);
+                                                setState(() {});
                                               },
                                             ),
                                           ],

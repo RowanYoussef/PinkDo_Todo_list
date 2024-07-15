@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pinkdo/database/sql.dart';
+import 'package:pinkdo/logic/wish_list_logic.dart';
+import 'package:pinkdo/logic/wish_logic.dart';
 
 class Wish extends StatefulWidget {
   @override
@@ -7,34 +9,7 @@ class Wish extends StatefulWidget {
 }
 
 class _WishState extends State<Wish> {
-  TextEditingController titleController = TextEditingController();
-  TextEditingController descriptionController = TextEditingController();
-  Sqldb sqldb = Sqldb();
-
-  void saveWish() async {
-    try {
-      String title = titleController.text.trim();
-      String description = descriptionController.text.trim();
-      ;
-
-      if (title.isNotEmpty) {
-        int response = await sqldb.insertData(
-            "INSERT INTO wishes (wish, completed, description) VALUES ('$title', 0, '$description')");
-        if (response > 0) Navigator.pop(context, true);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Please enter a title for the wish.'),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-        ));
-      }
-    } catch (e) {
-      print("Error: $e");
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('An error occurred. Please try again later.'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-      ));
-    }
-  }
+  WishLogic wishLogic = WishLogic();
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +46,7 @@ class _WishState extends State<Wish> {
           child: ListView(
             children: <Widget>[
               TextField(
-                controller: titleController,
+                controller: wishLogic.titleController,
                 style: textStyle,
                 decoration: InputDecoration(
                   labelText: 'Title',
@@ -87,7 +62,7 @@ class _WishState extends State<Wish> {
               ),
               SizedBox(height: 15),
               TextField(
-                controller: descriptionController,
+                controller: wishLogic.descriptionController,
                 style: textStyle,
                 decoration: InputDecoration(
                   labelText: 'Description',
@@ -108,7 +83,7 @@ class _WishState extends State<Wish> {
                 children: <Widget>[
                   ElevatedButton(
                     onPressed: () {
-                      saveWish();
+                      wishLogic.saveWish(context);
                     },
                     child: Text(
                       'Save',

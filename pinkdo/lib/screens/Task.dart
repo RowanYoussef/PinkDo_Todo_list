@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pinkdo/database/sql.dart';
+import 'package:pinkdo/logic/task_logic.dart';
 
 class Task extends StatefulWidget {
   @override
@@ -8,10 +9,9 @@ class Task extends StatefulWidget {
 }
 
 class _TaskState extends State<Task> {
-  TextEditingController titleController = TextEditingController();
-  TextEditingController descriptionController = TextEditingController();
-  TextEditingController deadlineController = TextEditingController();
+ TextEditingController deadlineController = TextEditingController();
   DateTime? selectedDate;
+  TaskLogic taskLogic = TaskLogic();
   Sqldb sqldb = Sqldb();
 
   void selectDate(BuildContext context) async {
@@ -29,35 +29,6 @@ class _TaskState extends State<Task> {
       });
     }
   }
-
-  void saveTask() async {
-    try {
-      String title = titleController.text.trim();
-      String description = descriptionController.text.trim();
-
-      String? deadline = deadlineController.text;
-
-      if (title.isNotEmpty) {
-        int response = await sqldb.insertData(
-            "INSERT INTO tasks (task, completed, description, deadline) VALUES ('$title', 0, '$description', '$deadline')");
-        if (response > 0) {
-          Navigator.pop(context, true);
-        }
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Please enter a title for the task.'),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-        ));
-      }
-    } catch (e) {
-      print("Error: $e");
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('An error occurred. Please try again later.'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-      ));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     TextStyle? textStyle = Theme.of(context)
@@ -93,7 +64,7 @@ class _TaskState extends State<Task> {
           child: ListView(
             children: <Widget>[
               TextField(
-                controller: titleController,
+                controller: taskLogic.titleController,
                 style: textStyle,
                 decoration: InputDecoration(
                   labelText: 'Title',
@@ -110,7 +81,7 @@ class _TaskState extends State<Task> {
               ),
               SizedBox(height: 15),
               TextField(
-                controller: descriptionController,
+                controller:taskLogic.descriptionController,
                 style: textStyle,
                 decoration: InputDecoration(
                   labelText: 'Description',
@@ -155,7 +126,7 @@ class _TaskState extends State<Task> {
                 children: <Widget>[
                   ElevatedButton(
                     onPressed: () {
-                      saveTask();
+                      taskLogic.saveTask(context,deadlineController.text);
                     },
                     child: Text(
                       'Save',
