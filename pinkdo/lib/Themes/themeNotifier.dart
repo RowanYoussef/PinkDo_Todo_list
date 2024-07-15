@@ -20,7 +20,7 @@ class ThemeNotifier extends ChangeNotifier {
   }
 
   void toggleTheme() {
-    _currentTheme = _currentTheme == MyAppThemes().blueTheme
+    _currentTheme = isBlue()
         ? MyAppThemes().PinkTheme
         : MyAppThemes().blueTheme;
     saveTheme();
