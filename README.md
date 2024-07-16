@@ -36,7 +36,7 @@ The application enables you to organize your tasks and wishes efficiently, keepi
 
 ![Screenshot (7)](https://github.com/user-attachments/assets/9ddf56b4-4411-44dd-af8c-c4e1582e6d6b)
 
-7-blue_mode option i think it's preferable to pink >_<
+7-blue_mode option i think it's preferable to pink 😆
 
 
 
@@ -57,7 +57,7 @@ The application enables you to organize your tasks and wishes efficiently, keepi
 
 4-install packages 
 
-`flutter pub get`
+<flutter pub get>
 
 5-run the app
 
