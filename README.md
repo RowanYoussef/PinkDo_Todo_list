@@ -58,7 +58,7 @@ The application enables you to organize your tasks and wishes efficiently, keepi
 4-install packages 
 
 #####
-       flutter pub get
+     flutter pub get
 
 5-run the app
 
