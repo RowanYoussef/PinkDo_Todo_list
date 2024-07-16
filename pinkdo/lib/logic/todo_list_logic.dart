@@ -24,7 +24,7 @@ class TodoListLogic {
     await sqldb.deleteAllTasks();
   }
 
-  void openTask(Map task,context) {
+  void openTask(Map task, context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {

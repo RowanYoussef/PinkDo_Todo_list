@@ -54,7 +54,7 @@ class _TodoListState extends State<TodoList> {
                           },
                         ),
                         ListTile(
-                          leading: Icon(Icons.star,
+                          leading: Icon(Icons.favorite,
                               color: Theme.of(context).colorScheme.primary),
                           title: Text('Your Wishes',
                               style: TextStyle(
@@ -202,7 +202,10 @@ class _TodoListState extends State<TodoList> {
                                               .colorScheme
                                               .primary,
                                           child: Icon(
-                                            Icons.task,
+                                            task['icon'] != ''
+                                                ? IconData(task['icon'],
+                                                    fontFamily: 'MaterialIcons')
+                                                : Icons.task,
                                             color: Colors.white,
                                           ),
                                         ),

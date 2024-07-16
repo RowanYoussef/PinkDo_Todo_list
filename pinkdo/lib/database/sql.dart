@@ -28,7 +28,8 @@ class Sqldb {
     "task" TEXT NOT NULL,
     "completed" INTEGER,
     "Description" Text,
-    "DeadLine" Text
+    "DeadLine" Text,
+    "icon" INREGER
    )
    ''');
     await db.execute('''
@@ -36,7 +37,8 @@ class Sqldb {
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
     "wish" TEXT NOT NULL,
     "completed" INTEGER,
-    "Description" Text
+    "Description" Text,
+    "icon" INREGER
    )
    ''');
     print("create database");

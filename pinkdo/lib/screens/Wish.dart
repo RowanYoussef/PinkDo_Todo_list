@@ -10,6 +10,7 @@ class Wish extends StatefulWidget {
 
 class _WishState extends State<Wish> {
   WishLogic wishLogic = WishLogic();
+  IconData? selectedIcon = Icons.favorite;
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +79,26 @@ class _WishState extends State<Wish> {
                 ),
               ),
               SizedBox(height: 30),
+                            Row(
+                children: [
+                  Text(
+                    'Select Icon:',
+                    style: textStyle,
+                  ),
+                  IconButton(
+                    icon: selectedIcon == null
+                        ? Icon(Icons.add)
+                        : Icon(selectedIcon),
+                    onPressed: () async {
+                      await wishLogic.showIconPicker(context);
+                      setState(() {
+                        selectedIcon = wishLogic.getSelectedIcon();
+                      });
+                    },
+                  ),
+                ],
+              ),
+             SizedBox(height: 30),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[

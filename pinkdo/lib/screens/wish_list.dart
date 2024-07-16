@@ -179,7 +179,10 @@ class _WishListState extends State<WishList> {
                                               .colorScheme
                                               .primary,
                                           child: Icon(
-                                            Icons.star,
+                                                wish['icon'] != ''
+                                                ? IconData(wish['icon'],
+                                                    fontFamily: 'MaterialIcons')
+                                                : Icons.favorite,
                                             color: Colors.white,
                                           ),
                                         ),

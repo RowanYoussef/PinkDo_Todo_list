@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pinkdo/database/sql.dart';
+import 'package:pinkdo/icons.dart';
 import 'package:pinkdo/logic/task_logic.dart';
+import 'package:pinkdo/icons.dart';
 
 class Task extends StatefulWidget {
   @override
@@ -9,26 +11,11 @@ class Task extends StatefulWidget {
 }
 
 class _TaskState extends State<Task> {
- TextEditingController deadlineController = TextEditingController();
   DateTime? selectedDate;
+  IconData? selectedIcon = Icons.task;
   TaskLogic taskLogic = TaskLogic();
   Sqldb sqldb = Sqldb();
 
-  void selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: selectedDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2100),
-    );
-    if (picked != null && picked != selectedDate) {
-      setState(() {
-        selectedDate = picked;
-        deadlineController.text =
-            DateFormat('yyyy-MM-dd').format(selectedDate!);
-      });
-    }
-  }
   @override
   Widget build(BuildContext context) {
     TextStyle? textStyle = Theme.of(context)
@@ -81,7 +68,7 @@ class _TaskState extends State<Task> {
               ),
               SizedBox(height: 15),
               TextField(
-                controller:taskLogic.descriptionController,
+                controller: taskLogic.descriptionController,
                 style: textStyle,
                 decoration: InputDecoration(
                   labelText: 'Description',
@@ -98,10 +85,10 @@ class _TaskState extends State<Task> {
               ),
               SizedBox(height: 15),
               TextField(
-                controller: deadlineController,
+                controller: taskLogic.deadlineController,
                 style: textStyle,
                 decoration: InputDecoration(
-                  labelText: 'Deadline',
+                  labelText: selectedDate != null ? '$selectedDate' :'Deadline',
                   labelStyle: textStyle,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -113,8 +100,11 @@ class _TaskState extends State<Task> {
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(Icons.calendar_today),
-                    onPressed: () {
-                      selectDate(context);
+                    onPressed: () async {
+                      await taskLogic.selectDate(context);
+                      setState(() {
+                        selectedDate = taskLogic.getSelectedDate();
+                      });
                     },
                   ),
                 ),
@@ -122,11 +112,31 @@ class _TaskState extends State<Task> {
               ),
               SizedBox(height: 30),
               Row(
+                children: [
+                  Text(
+                    'Select Icon:',
+                    style: textStyle,
+                  ),
+                  IconButton(
+                    icon: selectedIcon == null
+                        ? Icon(Icons.add)
+                        : Icon(selectedIcon),
+                    onPressed: () async {
+                      await taskLogic.showIconPicker(context);
+                      setState(() {
+                        selectedIcon = taskLogic.getSelectedIcon();
+                      });
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(height: 30),
+              Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   ElevatedButton(
                     onPressed: () {
-                      taskLogic.saveTask(context,deadlineController.text);
+                      taskLogic.saveTask(context, selectedIcon!.codePoint);
                     },
                     child: Text(
                       'Save',
