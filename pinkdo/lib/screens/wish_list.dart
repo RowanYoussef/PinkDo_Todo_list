@@ -134,7 +134,7 @@ class _WishListState extends State<WishList> {
                         wishes.isEmpty && completedwishes.isEmpty
                             ? Center(
                                 child: Text(
-                                  "No tasks available",
+                                  "No wishes available",
                                   style: TextStyle(
                                       color: Colors.grey[600], fontSize: 18),
                                 ),
