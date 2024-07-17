@@ -6,7 +6,7 @@ The application enables you to organize your tasks and wishes efficiently, keepi
 - The app is developed using Dart programming language and Flutter framework
 - It utilizes SQLite as a local database to store tasks in your device, initialized during app installation and automatically deleted upon app removal
 - Shared preferences are used to save the selected mode when the app is closed and restore it when reopened
-- design patterns : Singltom patern to ensure that only one instance of the database is used , Observer Patern For notifying all screens when a mode switch occurs in one screen,This pattern allows screens to subscribe to changes 
+- design patterns : Singlton patern to ensure that only one instance of the database is used , Observer Patern For notifying all screens when a mode switch occurs in one screen,This pattern allows screens to subscribe to changes 
  
 ### APP_Features and User Manual
 1- add a new task or wish
